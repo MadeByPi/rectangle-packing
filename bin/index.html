@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8"/>
+	<title>rectangle-packing</title>
+	<meta name="description" content="" />
+	<!--script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script-->
+	<script type="text/javascript" src="./jquery.min.js"></script>
+	<style>
+		html, body{
+			margin:0;
+		}
+	
+		div#rectContainer {
+			position:relative;
+			width:330px;
+			height:830px;
+		}
+		
+		.fixedElement {
+			display:none;
+			position:absolute;
+		}
+		
+		.packableElement{
+			display:none;
+			position:absolute;
+		}
+		
+		.packedElement{
+			position:absolute;
+		}
+	</style>
+</head>
+
+<body>
+	
+	<div id="rectContainer">
+		<!-- Fixed elements -
+		Here you define the spaces that will be left un-filled (negative space) in the rectangle-packing.
+		The code will try to pack elements as close as possible to the #fixed-master element (trying to get to the middle of the rect)
+		
+		If a fixed-master not specified, the packable elements will arrange around the centre of the main div#rectContainer bounds.
+		The Fixed elements all need absolute positioning (top and left) and a fixed width/height
+		-->
+		<div id="fixed-master"	class="fixedElement" style="width:196px;height:230px;top:150px;left:200px;"></div>
+		<!--div 					class="fixedElement" style="width:50px;height:100px;top:0px;left:0px;"></div>
+		<div 					class="fixedElement" style="width:64px;height:37px;top:0px;left:50px;"></div>
+		<div 					class="fixedElement" style="width:31px;height:154px;top:0px;left:498px;"></div>
+		<div 					class="fixedElement" style="width:31px;height:140px;top:390px;left:498px;"></div>
+		<div 					class="fixedElement" style="width:50px;height:45px;top:486px;left:0px;"></div-->
+		
+		<!-- packables - a fixed width/height must be defined on each item with the packableElement class -->
+		<!-- if a packableElement can't be placed it will be removed from the dom. -->
+		<div class="packableElement" style="width:150px;height:211px;"></div>
+		<div class="packableElement" style="width:60px;height:95px;"></div>
+		<div class="packableElement" style="width:125px;height:190px;"></div>
+		<div class="packableElement" style="width:101px;height:154px;"></div>
+		<div class="packableElement" style="width:90px;height:140px;"></div>
+		<div class="packableElement" style="width:116px;height:163px;"></div>
+		<div class="packableElement" style="width:100px;height:155px;"></div>
+		<div class="packableElement" style="width:62px;height:90px;"></div>
+		<div class="packableElement" style="width:60px;height:84px;"></div>
+		<div class="packableElement" style="width:51px;height:76px;"></div>
+		<div class="packableElement" style="width:48px;height:58px;"></div>
+		<div class="packableElement" style="width:96px;height:72px;"></div>
+		<div class="packableElement" style="width:48px;height:48px;"></div>
+		<div class="packableElement" style="width:32px;height:48px;"></div>
+		<div class="packableElement" style="width:32px;height:48px;"></div>
+		<div class="packableElement" style="width:42px;height:48px;"></div>
+		<div class="packableElement" style="width:32px;height:32px;"></div>
+	</div>
+	
+	<!-- debug: the un-minified debug build. Use this to be able to get more logging and see the fixed (negative) areas and the packable-elements as they are packed...-->
+	<script data="mbp_rectanglePacker" src="rectanglepacking-debug.js?container=div#rectContainer&xCellSize=4&yCellSize=4&padX=8&padY=8"></script>
+	
+	<!-- release: the minified release build.
+	The data attribute with a value of "mbp_rectanglePacker" is required
+	
+	Parameters on the src query string are used to configure the packer...
+	
+	container:
+	- A jQuery selector targetting the container div for the packable content. E.g. "div#rectContainer"
+	
+	xCellSize,yCellSize:
+	- Cell sizes determine the accuracy (and speed) of the packing.
+	- Larger values make it faster but less accurate, smaller values make it slower but results in more precise positioning...
+	- The default of 8x8 seems to be a good compromise between speed and accuracy
+	
+	padX,padY:
+	- Sets the x/y padding between the packable elements (can also be negative if you want overlapping content....)
+	-->
+	<!--
+	<script data="mbp_rectanglePacker" src="rectanglepacking.min.js?container=div#rectContainer&xCellSize=8&yCellSize=8&padX=4&padY=4"></script>
+	-->
+</body>
+</html>
