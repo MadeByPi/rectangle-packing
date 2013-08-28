@@ -1,4 +1,7 @@
 (function () { "use strict";
+var _Either = {}
+_Either.Either_Impl_ = function() { }
+_Either.Either_Impl_.__name__ = true;
 var HxOverrides = function() { }
 HxOverrides.__name__ = true;
 HxOverrides.cca = function(s,index) {
@@ -27,11 +30,6 @@ Main.main = function() {
 			return;
 		} else throw(err);
 	}
-	haxe.Log.trace = function(v,inf) {
-		var type = inf != null && inf.customParams != null?inf.customParams[0]:null;
-		if(type != "warn" && type != "info" && type != "debug" && type != "error") type = inf == null?"error":"log";
-		if(type == "info" || type == "error" || type == "warning") haxe.Firebug.trace(v,inf);
-	};
 	new $(function(e) {
 		var parameters = Main.getScriptSrcParameters("mbp_rectanglePacker");
 		var container = Main.getParameter("container",parameters,"div#rectContainer");
@@ -79,9 +77,6 @@ NameValuePair.prototype = {
 }
 var Std = function() { }
 Std.__name__ = true;
-Std.string = function(s) {
-	return js.Boot.__string_rec(s,"");
-}
 Std.parseInt = function(x) {
 	var v = parseInt(x,10);
 	if(v == 0 && (HxOverrides.cca(x,1) == 120 || HxOverrides.cca(x,1) == 88)) v = parseInt(x);
@@ -92,13 +87,6 @@ Std.parseFloat = function(x) {
 	return parseFloat(x);
 }
 var haxe = {}
-haxe.Firebug = function() { }
-haxe.Firebug.__name__ = true;
-haxe.Firebug.trace = function(v,inf) {
-	var type = inf != null && inf.customParams != null?inf.customParams[0]:null;
-	if(type != "warn" && type != "info" && type != "debug" && type != "error") type = inf == null?"error":"log";
-	console[type]((inf == null?"":inf.fileName + ":" + inf.lineNumber + " : ") + Std.string(v));
-}
 haxe.Log = function() { }
 haxe.Log.__name__ = true;
 haxe.Log.trace = function(v,infos) {
@@ -106,7 +94,7 @@ haxe.Log.trace = function(v,infos) {
 }
 haxe.Timer = function(time_ms) {
 	var me = this;
-	this.id = window.setInterval(function() {
+	this.id = setInterval(function() {
 		me.run();
 	},time_ms);
 };
@@ -121,10 +109,11 @@ haxe.Timer.delay = function(f,time_ms) {
 }
 haxe.Timer.prototype = {
 	run: function() {
+		haxe.Log.trace("run",{ fileName : "Timer.hx", lineNumber : 98, className : "haxe.Timer", methodName : "run"});
 	}
 	,stop: function() {
 		if(this.id == null) return;
-		window.clearInterval(this.id);
+		clearInterval(this.id);
 		this.id = null;
 	}
 	,__class__: haxe.Timer
@@ -138,6 +127,14 @@ js.Boot.__unhtml = function(s) {
 js.Boot.__trace = function(v,i) {
 	var msg = i != null?i.fileName + ":" + i.lineNumber + ": ":"";
 	msg += js.Boot.__string_rec(v,"");
+	if(i != null && i.customParams != null) {
+		var _g = 0, _g1 = i.customParams;
+		while(_g < _g1.length) {
+			var v1 = _g1[_g];
+			++_g;
+			msg += "," + js.Boot.__string_rec(v1,"");
+		}
+	}
 	var d;
 	if(typeof(document) != "undefined" && (d = document.getElementById("haxe:trace")) != null) d.innerHTML += js.Boot.__unhtml(msg) + "<br/>"; else if(typeof(console) != "undefined" && console.log != null) console.log(msg);
 }
@@ -222,35 +219,33 @@ js.Boot.__interfLoop = function(cc,cl) {
 	return js.Boot.__interfLoop(cc.__super__,cl);
 }
 js.Boot.__instanceof = function(o,cl) {
-	try {
-		if(o instanceof cl) {
-			if(cl == Array) return o.__enum__ == null;
-			return true;
-		}
-		if(js.Boot.__interfLoop(o.__class__,cl)) return true;
-	} catch( e ) {
-		if(cl == null) return false;
-	}
+	if(cl == null) return false;
 	switch(cl) {
 	case Int:
-		return Math.ceil(o%2147483648.0) === o;
+		return (o|0) === o;
 	case Float:
 		return typeof(o) == "number";
 	case Bool:
-		return o === true || o === false;
+		return typeof(o) == "boolean";
 	case String:
 		return typeof(o) == "string";
 	case Dynamic:
 		return true;
 	default:
-		if(o == null) return false;
-		if(cl == Class && o.__name__ != null) return true; else null;
-		if(cl == Enum && o.__ename__ != null) return true; else null;
+		if(o != null) {
+			if(typeof(cl) == "function") {
+				if(o instanceof cl) {
+					if(cl == Array) return o.__enum__ == null;
+					return true;
+				}
+				if(js.Boot.__interfLoop(o.__class__,cl)) return true;
+			}
+		} else return false;
+		if(cl == Class && o.__name__ != null) return true;
+		if(cl == Enum && o.__ename__ != null) return true;
 		return o.__enum__ == cl;
 	}
 }
-js.Lib = function() { }
-js.Lib.__name__ = true;
 var madebypi = {}
 madebypi.util = {}
 madebypi.util.rectanglepacking = {}
@@ -282,7 +277,7 @@ madebypi.util.rectanglepacking.Packer = function(containerSelector,xCellSize,yCe
 	this.packableElements.css("display","none");
 	this.prepare();
 	this.fixedElements.remove();
-	if(this.packables.length > 0) this.packItem(0); else haxe.Log.trace("Nothing to pack...?",{ fileName : "Packer.hx", lineNumber : 121, className : "madebypi.util.rectanglepacking.Packer", methodName : "new", customParams : ["warn"]});
+	if(this.packables.length > 0) this.packItem(0); else haxe.Log.trace("Nothing to pack...?",{ fileName : "Packer.hx", lineNumber : 122, className : "madebypi.util.rectanglepacking.Packer", methodName : "new", customParams : ["warn"]});
 };
 madebypi.util.rectanglepacking.Packer.__name__ = true;
 madebypi.util.rectanglepacking.Packer.getDomElementBounds = function(dom) {
@@ -291,7 +286,7 @@ madebypi.util.rectanglepacking.Packer.getDomElementBounds = function(dom) {
 	var left = Std.parseFloat(element.css("left"));
 	if(Math.isNaN(top)) top = 0;
 	if(Math.isNaN(left)) left = 0;
-	return new madebypi.util.rectanglepacking.geom.Rectangle(left,top,Std.parseFloat(element.width()),Std.parseFloat(element.height()));
+	return new madebypi.util.rectanglepacking.geom.Rectangle(left,top,element.width(),element.height());
 }
 madebypi.util.rectanglepacking.Packer.prototype = {
 	sortPackableItemsByArea: function() {
@@ -368,21 +363,21 @@ madebypi.util.rectanglepacking.Packer.prototype = {
 			}
 		}
 		if(!spaceFound) {
-			haxe.Log.trace("I'm sorry, I can't place that Dave.",{ fileName : "Packer.hx", lineNumber : 288, className : "madebypi.util.rectanglepacking.Packer", methodName : "findSpace"});
+			haxe.Log.trace("I'm sorry, I can't place that Dave.",{ fileName : "Packer.hx", lineNumber : 289, className : "madebypi.util.rectanglepacking.Packer", methodName : "findSpace"});
 			return null;
 		}
 		nearest.inflate(-this.padX,-this.padY);
 		return nearest;
 	}
 	,packComplete: function() {
-		haxe.Log.trace("Packing completed!",{ fileName : "Packer.hx", lineNumber : 211, className : "madebypi.util.rectanglepacking.Packer", methodName : "packComplete", customParams : ["info"]});
+		haxe.Log.trace("Packing completed!",{ fileName : "Packer.hx", lineNumber : 212, className : "madebypi.util.rectanglepacking.Packer", methodName : "packComplete", customParams : ["info"]});
 		var c = 0;
 		var _g1 = 0, _g = this.packables.length;
 		while(_g1 < _g) {
 			var i = _g1++;
 			if(this.packables[i].packed) c++;
 		}
-		haxe.Log.trace("Packed " + c + " of a possible " + this.packables.length + " rectangles",{ fileName : "Packer.hx", lineNumber : 215, className : "madebypi.util.rectanglepacking.Packer", methodName : "packComplete", customParams : ["info"]});
+		haxe.Log.trace("Packed " + c + " of a possible " + this.packables.length + " rectangles",{ fileName : "Packer.hx", lineNumber : 216, className : "madebypi.util.rectanglepacking.Packer", methodName : "packComplete", customParams : ["info"]});
 	}
 	,packItem: function(index) {
 		var _g = this;
@@ -393,18 +388,18 @@ madebypi.util.rectanglepacking.Packer.prototype = {
 		if(!item.packed && !item.unpackable) {
 			r = this.findSpace(this.targetPoint,item.rect.clone());
 			if(r == null) {
-				haxe.Log.trace("Out of space! Can't place item " + item.index + " " + Std.string(new $(item.element).html()),{ fileName : "Packer.hx", lineNumber : 171, className : "madebypi.util.rectanglepacking.Packer", methodName : "packItem", customParams : ["info"]});
+				haxe.Log.trace("Out of space! Can't place item " + item.index + " " + new $(item.element).html(),{ fileName : "Packer.hx", lineNumber : 172, className : "madebypi.util.rectanglepacking.Packer", methodName : "packItem", customParams : ["info"]});
 				item.unpackable = true;
 				new $(item.element).remove();
 			} else {
-				haxe.Log.trace("Placing item " + item.index + " at " + r.toString(),{ fileName : "Packer.hx", lineNumber : 177, className : "madebypi.util.rectanglepacking.Packer", methodName : "packItem"});
+				haxe.Log.trace("Placing item " + item.index + " at " + r.toString(),{ fileName : "Packer.hx", lineNumber : 178, className : "madebypi.util.rectanglepacking.Packer", methodName : "packItem"});
 				item.packed = true;
 				this.fixedPositions.push(r);
 				new $(item.element).css("left",r.x).css("top",r.y).css("display","block").removeClass("packableElement").addClass("packedElement");
 			}
 		}
 		var delta = new Date().getTime() - start;
-		haxe.Log.trace("Took " + delta + "ms to pack rect",{ fileName : "Packer.hx", lineNumber : 192, className : "madebypi.util.rectanglepacking.Packer", methodName : "packItem"});
+		haxe.Log.trace("Took " + delta + "ms to pack rect",{ fileName : "Packer.hx", lineNumber : 193, className : "madebypi.util.rectanglepacking.Packer", methodName : "packItem"});
 		index++;
 		if(index == this.packables.length) {
 			this.packComplete();
@@ -417,7 +412,7 @@ madebypi.util.rectanglepacking.Packer.prototype = {
 		var masterFixedNode = new $("div#fixed-master.fixedElement");
 		var targetRect;
 		if(masterFixedNode.length == 0) {
-			haxe.Log.trace("#fixed-master not found in .fixedElement items. Using the container instead...",{ fileName : "Packer.hx", lineNumber : 136, className : "madebypi.util.rectanglepacking.Packer", methodName : "prepare", customParams : ["info"]});
+			haxe.Log.trace("#fixed-master not found in .fixedElement items. Using the container instead...",{ fileName : "Packer.hx", lineNumber : 137, className : "madebypi.util.rectanglepacking.Packer", methodName : "prepare", customParams : ["info"]});
 			targetRect = this.outerBounds.clone();
 		} else targetRect = madebypi.util.rectanglepacking.Packer.getDomElementBounds(masterFixedNode[0]);
 		this.sortPackableItemsByArea();
@@ -444,7 +439,10 @@ madebypi.util.rectanglepacking.geom.Point = function(pX,pY) {
 };
 madebypi.util.rectanglepacking.geom.Point.__name__ = true;
 madebypi.util.rectanglepacking.geom.Point.prototype = {
-	__class__: madebypi.util.rectanglepacking.geom.Point
+	clone: function() {
+		return new madebypi.util.rectanglepacking.geom.Point(this.x,this.y);
+	}
+	,__class__: madebypi.util.rectanglepacking.geom.Point
 }
 madebypi.util.rectanglepacking.geom.Rectangle = function(x,y,width,height) {
 	if(height == null) height = 0.0;
@@ -457,6 +455,9 @@ madebypi.util.rectanglepacking.geom.Rectangle = function(x,y,width,height) {
 	this.height = height;
 };
 madebypi.util.rectanglepacking.geom.Rectangle.__name__ = true;
+madebypi.util.rectanglepacking.geom.Rectangle.intersects = function(rectA,rectB) {
+	return (rectA.get_right() > rectB.get_right()?rectB.get_right():rectA.get_right()) <= (rectA.x < rectB.x?rectB.x:rectA.x)?false:(rectA.get_bottom() > rectB.get_bottom()?rectB.get_bottom():rectA.get_bottom()) > (rectA.y < rectB.y?rectB.y:rectA.y);
+}
 madebypi.util.rectanglepacking.geom.Rectangle.prototype = {
 	inflate: function(dx,dy) {
 		this.x -= dx;
@@ -520,30 +521,7 @@ var Bool = Boolean;
 Bool.__ename__ = ["Bool"];
 var Class = { __name__ : ["Class"]};
 var Enum = { };
-js.XMLHttpRequest = window.XMLHttpRequest?XMLHttpRequest:window.ActiveXObject?function() {
-	try {
-		return new ActiveXObject("Msxml2.XMLHTTP");
-	} catch( e ) {
-		try {
-			return new ActiveXObject("Microsoft.XMLHTTP");
-		} catch( e1 ) {
-			throw "Unable to create XMLHttpRequest object.";
-		}
-	}
-}:(function($this) {
-	var $r;
-	throw "Unable to create XMLHttpRequest object.";
-	return $r;
-}(this));
-if(typeof document != "undefined") js.Lib.document = document;
-if(typeof window != "undefined") {
-	js.Lib.window = window;
-	js.Lib.window.onerror = function(msg,url,line) {
-		var f = js.Lib.onerror;
-		if(f == null) return false;
-		return f(msg,[url + ":" + line]);
-	};
-}
+Main.isDebug = false;
 madebypi.util.rectanglepacking.Packer.MAX_PACK_TIME = 40;
 Main.main();
 })();

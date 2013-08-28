@@ -31,14 +31,15 @@ THE SOFTWARE.*/
 
 package madebypi.util.rectanglepacking;
 
+import js.html.HtmlElement;
+import js.html.Node;
 import js.Lib;
 import haxe.Timer;
 
 import madebypi.util.rectanglepacking.geom.Point;
 import madebypi.util.rectanglepacking.geom.Rectangle;
 
-import js.Dom;
-import jQuery.JQuery;
+import jQuery.*;
 
 
 @:final class Packer {
@@ -81,20 +82,20 @@ import jQuery.JQuery;
 		
 		tempPt 			= new Point();
 		container 		= new JQuery(containerSelector);//"div#rectContainer"
-		outerBounds		= Packer.getDomElementBounds(container[0]);
+		outerBounds		= Packer.getDomElementBounds(cast container[0]);
 		
 		fixedElements 	= new JQuery(containerSelector + " div.fixedElement");
 		packableElements= new JQuery(containerSelector + " div.packableElement");
 		
 		packables 		= new Array<Packable>();
 		// colourise the movable dom elements....
-		packableElements.each(function(index:Int, value:Dom) {
-			packables.push(new Packable(index, value));
+		packableElements.each(function(index:Int, value:Node) {
+			packables.push(new Packable(index, cast value));
 		});
 		
 		fixedPositions = [];
-		fixedElements.each(function(index:Int, element:Dom) {
-			fixedPositions[index] = Packer.getDomElementBounds(element);
+		fixedElements.each(function(index:Int, element:Node) {
+			fixedPositions[index] = Packer.getDomElementBounds(cast element);
 		});
 		
 		#if debug
@@ -136,7 +137,7 @@ import jQuery.JQuery;
 			trace("#fixed-master not found in .fixedElement items. Using the container instead...", "info");
 			targetRect = outerBounds.clone();
 		} else {
-			targetRect = Packer.getDomElementBounds(masterFixedNode[0]);
+			targetRect = Packer.getDomElementBounds(cast masterFixedNode[0]);
 			
 			#if debug
 			masterFixedNode.css("display", "block").css("background-color", "#666");
@@ -328,26 +329,26 @@ import jQuery.JQuery;
 	 * @param	element
 	 * @return
 	 */
-	static public function getDomElementBounds(dom:Dom):Rectangle {
+	static public function getDomElementBounds(dom:HtmlElement):Rectangle {
 		var element = new JQuery(dom);
 		var top	:Float = Std.parseFloat(element.css("top"));
 		var left:Float = Std.parseFloat(element.css("left"));
 		if (Math.isNaN(top)) top = 0; if (Math.isNaN(left)) left = 0;
-		return new Rectangle(left, top, Std.parseFloat(element.width()), Std.parseFloat(element.height()));
+		return new Rectangle(left, top, element.width(), element.height());
 	}
 }
 
 
 @:final class Packable {
 		
-	public var element		:Dom;
+	public var element		:HtmlElement;
 	public var index		:Int;
 	public var rect			:Rectangle;
 	
 	public var packed		:Bool;
 	public var unpackable	:Bool;
 	
-	public function new(index:Int, element:Dom) {
+	public function new(index:Int, element:HtmlElement) {
 		this.unpackable	= false;
 		this.packed 	= false;
 		this.element 	= element;

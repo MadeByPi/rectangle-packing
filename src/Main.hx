@@ -29,8 +29,8 @@ THE SOFTWARE.*/
 
 package;
 
-import haxe.Firebug;
 import haxe.PosInfos;
+import jQuery.Event;
 
 import madebypi.util.rectanglepacking.Packer;
 
@@ -56,17 +56,6 @@ class Main {
 			trace(err, "error");
 			return;
 		}
-		
-		#if debug
-		if (Firebug.detect()) Firebug.redirectTraces();
-		#else
-		haxe.Log.trace = function(?v:Dynamic, ?inf:PosInfos) {
-			var type = if( inf != null && inf.customParams != null ) inf.customParams[0] else null;
-			if( type != "warn" && type != "info" && type != "debug" && type != "error" ) type = if ( inf == null ) "error" else "log";
-			// only pass on info/warn/error when built for release mode (not log or debug)
-			if (type == "info" || type == "error" || type=="warning") Firebug.trace(v, inf);
-		};
-		#end
 		
 		// jquery / dom ready
 		new JQuery(function (e:Event) {
