@@ -31,12 +31,12 @@ package madebypi.util.rectanglepacking.geom;
 
 @:final class Point {
 	
-	public var x : Float;
-	public var y : Float;
+	public var x : Int;
+	public var y : Int;
 
-	public function new(?pX : Float, ?pY : Float) {
-		x = pX == null ? 0.0 : pX;
-		y = pY == null ? 0.0 : pY;
+	public function new(?pX : Int, ?pY : Int) {
+		x = pX == null ? 0 : pX;
+		y = pY == null ? 0 : pY;
 	}
 
 	public function clone() : Point {

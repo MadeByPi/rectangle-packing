@@ -30,13 +30,13 @@ THE SOFTWARE.*/
 package;
 
 import haxe.PosInfos;
-import jQuery.Event;
+import haxe.web.Request;
+import js.Browser;
 
-import madebypi.util.rectanglepacking.Packer;
-
-import jQuery.JQuery;
+import js.JQuery;
 import js.Lib;
 
+import madebypi.util.rectanglepacking.Packer;
 
 class Main {
 	
@@ -48,53 +48,26 @@ class Main {
 	
 	// Static Main
 	static function main () {
-		
-		try {
-			checkJSScriptDepenencies();
-		} catch (err:String) {
-			trace("Error setting up - missing one or more JS script dependencies", "error");
-			trace(err, "error");
-			return;
-		}
-		
+				
 		// jquery / dom ready
-		new JQuery(function (e:Event) {
-			var parameters 	= getScriptSrcParameters("mbp_rectanglePacker");
-			var container 	= getParameter("container", parameters, "div#rectContainer");
-			var xCellSize 	= Std.parseInt(getParameter("xCellSize", parameters));
-			var yCellSize 	= Std.parseInt(getParameter("yCellSize", parameters));
-			var padX 		= Std.parseInt(getParameter("padX", parameters));
-			var padY 		= Std.parseInt(getParameter("padY", parameters));
-			
-			new Packer(container, xCellSize, yCellSize, padX, padY);
+		new JQuery(cast Browser.document).ready(function(_) {
+			var parameters = getScriptSrcParameters("mbp_rectanglePacker");
+			if (parameters != null) {
+				var container 	= parameters.exists("container") ? parameters.get("container") : "#rectContainer";
+				var xCellSize 	= Std.parseInt(parameters.get("xCellSize"));
+				var yCellSize 	= Std.parseInt(parameters.get("yCellSize"));
+				var padX 		= Std.parseInt(parameters.get("padX"));
+				var padY 		= Std.parseInt(parameters.get("padY"));
+				
+				var jContainer 	= new JQuery(container);
+				for (i in 0...32) { 
+					new JQuery(container).append(
+						new JQuery('<div class="packableElement" style="width:${(32 + Std.random(128 - 32))}px;height:${(32 + Std.random(128 - 32))}px;"></div>')
+					);
+				}				
+				Packer.create(container, xCellSize, yCellSize, padX, padY);
+			}
 		});
-	}
-	
-	
-	/**
-	 *
-	 */
-	private static function checkJSScriptDepenencies():Void {
-		// fix if missing console
-		untyped __js__("if(typeof console === 'undefined'){console={log:function(){},debug:function(){},warn:function(){},error:function(){},info:function(){}};}");
-		
-		var missing:Bool = false;
-		
-		// jQuery
-		missing = untyped __js__("typeof window.jQuery === 'undefined'");
-		if (missing) { throw "jQuery not found"; }
-	}
-	
-	
-	
-	/**
-	 * read a query-string parameter from the <script> tag that embedded us
-	 * @param	name
-	 * @return
-	 */
-	public static function getParameter(name:String, inParams:Array<NameValuePair>, ?defaultValue:String=null):String {
-		for (i in 0...inParams.length) if (inParams[i].name == name) return inParams[i].value;
-		return defaultValue;
 	}
 	
 	
@@ -104,17 +77,20 @@ class Main {
 	 * @param	scriptDataSelector
 	 * @return 	Array<NameValuePair>
 	 */
-	private static function getScriptSrcParameters(scriptDataSelector:String):Array<NameValuePair> {
-		var myScriptSrc		:String = new JQuery("script[data*=" + scriptDataSelector + "]").attr("src");
+	static function getScriptSrcParameters(scriptDataSelector:String):Map<String,String> {
 		
-		var params			:Array<String> = myScriptSrc.substr(myScriptSrc.indexOf("?") + 1).split("&");
-		var param			:Array<String>;
+		var embed = new JQuery("script[data*=" + scriptDataSelector + "]");
+		if (embed.length == 0) return null;
 		
-		var queryParameters	:Array<NameValuePair> = [];
+		var scriptSrc 		= embed.attr("src");
+		var params 			= scriptSrc.substr(scriptSrc.indexOf("?") + 1).split("&");
+		var queryParameters = new Map<String,String>();
+		
+		if (params.length < 2) return null;
 		
 		for (i in 0...params.length) {
-			param 				= params[i].split("=");
-			queryParameters[i] 	= new NameValuePair(param[0], param[1]);
+			var param = params[i].split("=");
+			queryParameters.set(param[0], param[1]);
 		}
 		
 		return queryParameters;

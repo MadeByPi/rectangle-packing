@@ -31,37 +31,40 @@ THE SOFTWARE.*/
 
 package madebypi.util.rectanglepacking;
 
+import haxe.Timer;
 import js.html.HtmlElement;
 import js.html.Node;
-import js.Lib;
-import haxe.Timer;
+import js.JQuery;
 
 import madebypi.util.rectanglepacking.geom.Point;
 import madebypi.util.rectanglepacking.geom.Rectangle;
 
-import jQuery.*;
 
-
+@:expose('RectanglePacker')
 @:final class Packer {
 	
-	private static var MAX_PACK_TIME			:Int = 40; //; max time in ms allowed for a packing step - 40ms == 25fps
+	static inline var MAX_PACK_TIME		:Int = 40; //; max time in ms allowed for a packing step - 40ms == 25fps
 	
-	private var packables						:Array<Packable>;
-	private var fixedPositions					:Array<Rectangle>;
-	private var areaSortedIndices				:Array<Int>;
-	private var targetPoint						:Point;
-	private var xCellSize						:Int;
-	private var yCellSize						:Int;
-	private var padX							:Int;
-	private var padY							:Int;
+	var packables						:Array<Packable>;
+	var fixedPositions					:Array<Rectangle>;
+	var areaSortedIndices				:Array<Int>;
+	var targetPoint						:Point;
+	var xCellSize						:Int;
+	var yCellSize						:Int;
+	var padX							:Int;
+	var padY							:Int;
 	
-	private var tempPt							:Point;
+	var tempPt							:Point;
 	
-	public var container(default, null)			:JQuery;
-	public var outerBounds(default, null)		:Rectangle;
-	public var fixedElements(default, null)		:JQuery;
-	public var packableElements(default, null)	:JQuery;
+	public var container(default, null):JQuery;
+	public var outerBounds(default, null):Rectangle;
+	public var fixedElements(default, null):JQuery;
+	public var packableElements(default, null):JQuery;
 	
+	
+	public static function create(containerSelector:String, ?xCellSize:Int=8, ?yCellSize:Int=8, ?padX:Int = 8, ?padY:Int = 8) {
+		return new Packer(containerSelector, xCellSize, yCellSize, padX, padY);
+	}
 	
 	/**
 	 * Create a new Packer...
@@ -72,6 +75,12 @@ import jQuery.*;
 	 */
 	public function new(containerSelector:String, ?xCellSize:Int=8, ?yCellSize:Int=8, ?padX:Int = 8, ?padY:Int = 8) {
 		
+		container = new JQuery(containerSelector);
+		if (container.length == 0) {
+			throw 'Container element "$containerSelector" does not exist.';
+			return;
+		}
+		
 		this.xCellSize  = xCellSize;
 		this.yCellSize  = yCellSize;
 		this.padX 		= padX;
@@ -81,14 +90,12 @@ import jQuery.*;
 		if (yCellSize < 1) yCellSize = 1;
 		
 		tempPt 			= new Point();
-		container 		= new JQuery(containerSelector);//"div#rectContainer"
 		outerBounds		= Packer.getDomElementBounds(cast container[0]);
 		
 		fixedElements 	= new JQuery(containerSelector + " div.fixedElement");
 		packableElements= new JQuery(containerSelector + " div.packableElement");
 		
 		packables 		= new Array<Packable>();
-		// colourise the movable dom elements....
 		packableElements.each(function(index:Int, value:Node) {
 			packables.push(new Packable(index, cast value));
 		});
@@ -119,7 +126,7 @@ import jQuery.*;
 		if(packables.length > 0){
 			packItem(0);
 		} else {
-			trace("Nothing to pack...?", "warn");
+			trace("Nothing to pack...?");
 		}
 	}
 	
@@ -127,18 +134,17 @@ import jQuery.*;
 	/**
 	 * Start packing elements...
 	 */
-	private function prepare():Void {
+	function prepare():Void {
 		
 		// masterFixedNode is the rect we will try to arrange elements around...
-		var masterFixedNode	:JQuery = new JQuery("div#fixed-master.fixedElement");
-		var targetRect		:Rectangle;
+		var masterFixedNode = new JQuery("div#fixed-master.fixedElement");
+		var targetRect;
 		
 		if (masterFixedNode.length == 0) {
-			trace("#fixed-master not found in .fixedElement items. Using the container instead...", "info");
+			trace("#fixed-master not found in .fixedElement items. Using the container instead...");
 			targetRect = outerBounds.clone();
 		} else {
 			targetRect = Packer.getDomElementBounds(cast masterFixedNode[0]);
-			
 			#if debug
 			masterFixedNode.css("display", "block").css("background-color", "#666");
 			#end
@@ -148,7 +154,7 @@ import jQuery.*;
 		sortPackableItemsByArea();
 		
 		// our target - the middle of the master rect
-		targetPoint = new Point(targetRect.x + targetRect.width / 2, targetRect.y + targetRect.height / 2);
+		targetPoint = new Point(targetRect.x + Math.round(targetRect.width/2), targetRect.y + Math.round(targetRect.height/2));
 	}
 	
 	/**
@@ -157,10 +163,10 @@ import jQuery.*;
 	 */
 	function packItem(index:Int):Void {
 		
-		var r				:Rectangle 	= null;
-		var start			:Float 		= Date.now().getTime();
-		var sortedIndex		:Int 		= areaSortedIndices[index];
-		var item			:Packable 	= packables[sortedIndex];
+		var r				= null;
+		var start 			= Date.now().getTime();
+		var sortedIndex		= areaSortedIndices[index];
+		var item		 	= packables[sortedIndex];
 		
 		if (!item.packed && !item.unpackable) { // not been processed already?
 			
@@ -169,7 +175,7 @@ import jQuery.*;
 			
 			if (r == null) {
 				// doh! no space found for that item...
-				trace("Out of space! Can't place item " + item.index + " " + new JQuery(item.element).html(), "info");
+				trace("Out of space! Can't place item " + item.index + " " + new JQuery(item.element).html());
 				// set item as unpackable and remove from the DOM
 				item.unpackable = true;
 				new JQuery(item.element).remove();
@@ -181,16 +187,18 @@ import jQuery.*;
 				item.packed = true;
 				fixedPositions.push(r);
 				// update position in the document...
-				new JQuery(item.element)
-					.css("left", r.x).css("top", r.y).css("display", "block")
+				item.jElement
+					.css({"left":r.x}).css({"top":r.y}).css("display", "block")
 					.removeClass("packableElement")
 					.addClass("packedElement");
 			}
 		}
 		
+		var delta = Date.now().getTime() - start;
 		
-		var delta:Float = Date.now().getTime() - start;
-		trace("Took " + delta + "ms to pack rect");
+		#if debug
+		trace('Took $delta ms to pack rect');
+		#end
 		
 		index++;
 		if (index == packables.length) {
@@ -198,7 +206,7 @@ import jQuery.*;
 			return;
 		} else {
 			if (delta > MAX_PACK_TIME) {
-				Timer.delay(function():Void { packItem(index); }, MAX_PACK_TIME);
+				Timer.delay(function() { packItem(index); }, MAX_PACK_TIME);
 			} else {
 				packItem(index);
 			}
@@ -208,16 +216,19 @@ import jQuery.*;
 	/**
 	 * TODO: need to call any actions on completion?
 	 */
-	private function packComplete():Void {
-		trace("Packing completed!", "info");
+	function packComplete():Void {
+		
+		trace("Packing complete");
+		
+		#if debug
 		var c:Int = 0;
 		for (i in 0...packables.length) if (packables[i].packed) c++;
-		
-		trace("Packed " + c + " of a possible " + packables.length + " rectangles", "info");
+		trace("Packed " + c + " of a possible " + packables.length + " rectangles");
+		#end
 	}
 	
 	// scan all the enclosing bounds for a space that will accomodate the rect
-	private function findSpace(target:Point, rect:Rectangle):Rectangle {
+	function findSpace(target:Point, rect:Rectangle):Rectangle {
 		
 		// add padding...
 		rect.inflate(padX, padY);
@@ -298,13 +309,11 @@ import jQuery.*;
 	
 	
 	// sort movable rects based on size (rect area)
-	private function sortPackableItemsByArea():Void {
+	function sortPackableItemsByArea() {
 		
 		// prepare...
-		var areas		:Array<Dynamic>	= [];
-		var sizeIndex	:Array<Int> 	= [];
-		var n			:Int 			= packables.length; // start with largest first
-		for (i in 0...n) {
+		var areas = [];
+		for (i in 0...packables.length) {
 			areas.push( { index:i, area:packables[i].rect.area } );
 		}
 		
@@ -317,9 +326,7 @@ import jQuery.*;
 		
 		// obtain sorted index array from areas
 		areaSortedIndices = [];
-		for (i in 0...n) {
-			areaSortedIndices[i] = areas[i].index;
-		}
+		for (i in 0...packables.length) areaSortedIndices[i] = areas[i].index;
 	}
 	
 	
@@ -330,31 +337,40 @@ import jQuery.*;
 	 * @return
 	 */
 	static public function getDomElementBounds(dom:HtmlElement):Rectangle {
-		var element = new JQuery(dom);
-		var top	:Float = Std.parseFloat(element.css("top"));
-		var left:Float = Std.parseFloat(element.css("left"));
+		
+		var s = dom.style;
+		
+		var width = Std.parseInt(s.width.substr(0, s.width.length - 2));
+		var height = Std.parseInt(s.height.substr(0, s.height.length - 2));
+		if (width==null) width = dom.clientWidth;
+		if (height==null) height = dom.clientHeight;
+		
+		var top	 = Std.parseInt(s.top);
+		var left = Std.parseInt(s.left);
 		if (Math.isNaN(top)) top = 0; if (Math.isNaN(left)) left = 0;
-		return new Rectangle(left, top, element.width(), element.height());
+		
+		return new Rectangle(left, top, width, height);
 	}
 }
 
 
 @:final class Packable {
-		
+	
 	public var element		:HtmlElement;
-	public var index		:Int;
 	public var rect			:Rectangle;
+	public var index		:Int;
 	
 	public var packed		:Bool;
 	public var unpackable	:Bool;
+	public var jElement		:JQuery;
 	
 	public function new(index:Int, element:HtmlElement) {
+		element.id		= "packable_" + index;
+		jElement		= new JQuery(element);
 		this.unpackable	= false;
 		this.packed 	= false;
 		this.element 	= element;
 		this.index 		= index;
-		this.rect		= Packer.getDomElementBounds(element);
-		
-		new JQuery(element).attr("id", "packable_" + index);
+		this.rect		= Packer.getDomElementBounds(element);		
 	}
 }

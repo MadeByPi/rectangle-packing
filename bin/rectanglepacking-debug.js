@@ -1,14 +1,21 @@
-(function () { "use strict";
-var _Either = {}
-_Either.Either_Impl_ = function() { }
-_Either.Either_Impl_.__name__ = true;
-var HxOverrides = function() { }
-HxOverrides.__name__ = true;
+(function(root, factory) {
+	if (typeof define === "function" && define.amd) {
+		// AMD. Register as an anonymous module.
+		define([], function() { var exports={}; factory(exports); return exports; });
+	 } else if (typeof exports === 'object') {
+		// CommonJS
+        factory(exports);
+	 } else {
+		// Browser globals
+		factory(root);
+	}
+}(this, function ($hx_exports) { "use strict";
+var HxOverrides = function() { };
 HxOverrides.cca = function(s,index) {
 	var x = s.charCodeAt(index);
 	if(x != x) return undefined;
 	return x;
-}
+};
 HxOverrides.substr = function(s,pos,len) {
 	if(pos != null && pos != 0 && len != null && len < 0) return "";
 	if(len == null) len = s.length;
@@ -17,88 +24,71 @@ HxOverrides.substr = function(s,pos,len) {
 		if(pos < 0) pos = 0;
 	} else if(len < 0) len = s.length + len - pos;
 	return s.substr(pos,len);
-}
-var Main = function() { }
-Main.__name__ = true;
+};
+var Main = function() { };
 Main.main = function() {
-	try {
-		Main.checkJSScriptDepenencies();
-	} catch( err ) {
-		if( js.Boot.__instanceof(err,String) ) {
-			haxe.Log.trace("Error setting up - missing one or more JS script dependencies",{ fileName : "Main.hx", lineNumber : 55, className : "Main", methodName : "main", customParams : ["error"]});
-			haxe.Log.trace(err,{ fileName : "Main.hx", lineNumber : 56, className : "Main", methodName : "main", customParams : ["error"]});
-			return;
-		} else throw(err);
-	}
-	new $(function(e) {
+	new js.JQuery(window.document).ready(function(_) {
 		var parameters = Main.getScriptSrcParameters("mbp_rectanglePacker");
-		var container = Main.getParameter("container",parameters,"div#rectContainer");
-		var xCellSize = Std.parseInt(Main.getParameter("xCellSize",parameters));
-		var yCellSize = Std.parseInt(Main.getParameter("yCellSize",parameters));
-		var padX = Std.parseInt(Main.getParameter("padX",parameters));
-		var padY = Std.parseInt(Main.getParameter("padY",parameters));
-		new madebypi.util.rectanglepacking.Packer(container,xCellSize,yCellSize,padX,padY);
+		if(parameters != null) {
+			var container;
+			if(parameters.exists("container")) container = parameters.get("container"); else container = "#rectContainer";
+			var xCellSize = Std.parseInt(parameters.get("xCellSize"));
+			var yCellSize = Std.parseInt(parameters.get("yCellSize"));
+			var padX = Std.parseInt(parameters.get("padX"));
+			var padY = Std.parseInt(parameters.get("padY"));
+			var jContainer = new js.JQuery(container);
+			var _g = 0;
+			while(_g < 32) {
+				var i = _g++;
+				new js.JQuery(container).append(new js.JQuery("<div class=\"packableElement\" style=\"width:" + (32 + Std.random(96)) + "px;height:" + (32 + Std.random(96)) + "px;\"></div>"));
+			}
+			madebypi.util.rectanglepacking.Packer.create(container,xCellSize,yCellSize,padX,padY);
+		}
 	});
-}
-Main.checkJSScriptDepenencies = function() {
-	if(typeof console === 'undefined'){console={log:function(){},debug:function(){},warn:function(){},error:function(){},info:function(){}};}
-	var missing = false;
-	missing = typeof window.jQuery === 'undefined';
-	if(missing) throw "jQuery not found";
-}
-Main.getParameter = function(name,inParams,defaultValue) {
-	var _g1 = 0, _g = inParams.length;
-	while(_g1 < _g) {
-		var i = _g1++;
-		if(inParams[i].name == name) return inParams[i].value;
-	}
-	return defaultValue;
-}
+};
 Main.getScriptSrcParameters = function(scriptDataSelector) {
-	var myScriptSrc = new $("script[data*=" + scriptDataSelector + "]").attr("src");
-	var params = HxOverrides.substr(myScriptSrc,myScriptSrc.indexOf("?") + 1,null).split("&");
-	var param;
-	var queryParameters = [];
-	var _g1 = 0, _g = params.length;
+	var embed = new js.JQuery("script[data*=" + scriptDataSelector + "]");
+	if(embed.length == 0) return null;
+	var scriptSrc = embed.attr("src");
+	var params = ((function($this) {
+		var $r;
+		var pos = scriptSrc.indexOf("?") + 1;
+		$r = HxOverrides.substr(scriptSrc,pos,null);
+		return $r;
+	}(this))).split("&");
+	var queryParameters = new haxe.ds.StringMap();
+	if(params.length < 2) return null;
+	var _g1 = 0;
+	var _g = params.length;
 	while(_g1 < _g) {
 		var i = _g1++;
-		param = params[i].split("=");
-		queryParameters[i] = new NameValuePair(param[0],param[1]);
+		var param = params[i].split("=");
+		queryParameters.set(param[0],param[1]);
 	}
 	return queryParameters;
-}
+};
 var NameValuePair = function(name,value) {
 	this.name = name;
 	this.value = value;
 };
-NameValuePair.__name__ = true;
-NameValuePair.prototype = {
-	__class__: NameValuePair
-}
-var Std = function() { }
-Std.__name__ = true;
+var IMap = function() { };
+var Std = function() { };
 Std.parseInt = function(x) {
 	var v = parseInt(x,10);
 	if(v == 0 && (HxOverrides.cca(x,1) == 120 || HxOverrides.cca(x,1) == 88)) v = parseInt(x);
 	if(isNaN(v)) return null;
 	return v;
-}
-Std.parseFloat = function(x) {
-	return parseFloat(x);
-}
-var haxe = {}
-haxe.Log = function() { }
-haxe.Log.__name__ = true;
-haxe.Log.trace = function(v,infos) {
-	js.Boot.__trace(v,infos);
-}
+};
+Std.random = function(x) {
+	if(x <= 0) return 0; else return Math.floor(Math.random() * x);
+};
+var haxe = {};
 haxe.Timer = function(time_ms) {
 	var me = this;
 	this.id = setInterval(function() {
 		me.run();
 	},time_ms);
 };
-haxe.Timer.__name__ = true;
 haxe.Timer.delay = function(f,time_ms) {
 	var t = new haxe.Timer(time_ms);
 	t.run = function() {
@@ -106,155 +96,47 @@ haxe.Timer.delay = function(f,time_ms) {
 		f();
 	};
 	return t;
-}
+};
 haxe.Timer.prototype = {
-	run: function() {
-		haxe.Log.trace("run",{ fileName : "Timer.hx", lineNumber : 98, className : "haxe.Timer", methodName : "run"});
-	}
-	,stop: function() {
+	stop: function() {
 		if(this.id == null) return;
 		clearInterval(this.id);
 		this.id = null;
 	}
-	,__class__: haxe.Timer
-}
-var js = {}
-js.Boot = function() { }
-js.Boot.__name__ = true;
-js.Boot.__unhtml = function(s) {
-	return s.split("&").join("&amp;").split("<").join("&lt;").split(">").join("&gt;");
-}
-js.Boot.__trace = function(v,i) {
-	var msg = i != null?i.fileName + ":" + i.lineNumber + ": ":"";
-	msg += js.Boot.__string_rec(v,"");
-	if(i != null && i.customParams != null) {
-		var _g = 0, _g1 = i.customParams;
-		while(_g < _g1.length) {
-			var v1 = _g1[_g];
-			++_g;
-			msg += "," + js.Boot.__string_rec(v1,"");
-		}
+	,run: function() {
 	}
-	var d;
-	if(typeof(document) != "undefined" && (d = document.getElementById("haxe:trace")) != null) d.innerHTML += js.Boot.__unhtml(msg) + "<br/>"; else if(typeof(console) != "undefined" && console.log != null) console.log(msg);
-}
-js.Boot.__string_rec = function(o,s) {
-	if(o == null) return "null";
-	if(s.length >= 5) return "<...>";
-	var t = typeof(o);
-	if(t == "function" && (o.__name__ || o.__ename__)) t = "object";
-	switch(t) {
-	case "object":
-		if(o instanceof Array) {
-			if(o.__enum__) {
-				if(o.length == 2) return o[0];
-				var str = o[0] + "(";
-				s += "\t";
-				var _g1 = 2, _g = o.length;
-				while(_g1 < _g) {
-					var i = _g1++;
-					if(i != 2) str += "," + js.Boot.__string_rec(o[i],s); else str += js.Boot.__string_rec(o[i],s);
-				}
-				return str + ")";
-			}
-			var l = o.length;
-			var i;
-			var str = "[";
-			s += "\t";
-			var _g = 0;
-			while(_g < l) {
-				var i1 = _g++;
-				str += (i1 > 0?",":"") + js.Boot.__string_rec(o[i1],s);
-			}
-			str += "]";
-			return str;
-		}
-		var tostr;
-		try {
-			tostr = o.toString;
-		} catch( e ) {
-			return "???";
-		}
-		if(tostr != null && tostr != Object.toString) {
-			var s2 = o.toString();
-			if(s2 != "[object Object]") return s2;
-		}
-		var k = null;
-		var str = "{\n";
-		s += "\t";
-		var hasp = o.hasOwnProperty != null;
-		for( var k in o ) { ;
-		if(hasp && !o.hasOwnProperty(k)) {
-			continue;
-		}
-		if(k == "prototype" || k == "__class__" || k == "__super__" || k == "__interfaces__" || k == "__properties__") {
-			continue;
-		}
-		if(str.length != 2) str += ", \n";
-		str += s + k + " : " + js.Boot.__string_rec(o[k],s);
-		}
-		s = s.substring(1);
-		str += "\n" + s + "}";
-		return str;
-	case "function":
-		return "<function>";
-	case "string":
-		return o;
-	default:
-		return String(o);
+};
+haxe.ds = {};
+haxe.ds.StringMap = function() {
+	this.h = { };
+};
+haxe.ds.StringMap.__interfaces__ = [IMap];
+haxe.ds.StringMap.prototype = {
+	set: function(key,value) {
+		this.h["$" + key] = value;
 	}
-}
-js.Boot.__interfLoop = function(cc,cl) {
-	if(cc == null) return false;
-	if(cc == cl) return true;
-	var intf = cc.__interfaces__;
-	if(intf != null) {
-		var _g1 = 0, _g = intf.length;
-		while(_g1 < _g) {
-			var i = _g1++;
-			var i1 = intf[i];
-			if(i1 == cl || js.Boot.__interfLoop(i1,cl)) return true;
-		}
+	,get: function(key) {
+		return this.h["$" + key];
 	}
-	return js.Boot.__interfLoop(cc.__super__,cl);
-}
-js.Boot.__instanceof = function(o,cl) {
-	if(cl == null) return false;
-	switch(cl) {
-	case Int:
-		return (o|0) === o;
-	case Float:
-		return typeof(o) == "number";
-	case Bool:
-		return typeof(o) == "boolean";
-	case String:
-		return typeof(o) == "string";
-	case Dynamic:
-		return true;
-	default:
-		if(o != null) {
-			if(typeof(cl) == "function") {
-				if(o instanceof cl) {
-					if(cl == Array) return o.__enum__ == null;
-					return true;
-				}
-				if(js.Boot.__interfLoop(o.__class__,cl)) return true;
-			}
-		} else return false;
-		if(cl == Class && o.__name__ != null) return true;
-		if(cl == Enum && o.__ename__ != null) return true;
-		return o.__enum__ == cl;
+	,exists: function(key) {
+		return this.h.hasOwnProperty("$" + key);
 	}
-}
-var madebypi = {}
-madebypi.util = {}
-madebypi.util.rectanglepacking = {}
-madebypi.util.rectanglepacking.Packer = function(containerSelector,xCellSize,yCellSize,padX,padY) {
+};
+var js = {};
+var madebypi = {};
+madebypi.util = {};
+madebypi.util.rectanglepacking = {};
+madebypi.util.rectanglepacking.Packer = $hx_exports.RectanglePacker = function(containerSelector,xCellSize,yCellSize,padX,padY) {
 	if(padY == null) padY = 8;
 	if(padX == null) padX = 8;
 	if(yCellSize == null) yCellSize = 8;
 	if(xCellSize == null) xCellSize = 8;
 	var _g = this;
+	this.container = new js.JQuery(containerSelector);
+	if(this.container.length == 0) {
+		throw "Container element \"" + containerSelector + "\" does not exist.";
+		return;
+	}
 	this.xCellSize = xCellSize;
 	this.yCellSize = yCellSize;
 	this.padX = padX;
@@ -262,53 +144,94 @@ madebypi.util.rectanglepacking.Packer = function(containerSelector,xCellSize,yCe
 	if(xCellSize < 1) xCellSize = 1;
 	if(yCellSize < 1) yCellSize = 1;
 	this.tempPt = new madebypi.util.rectanglepacking.geom.Point();
-	this.container = new $(containerSelector);
 	this.outerBounds = madebypi.util.rectanglepacking.Packer.getDomElementBounds(this.container[0]);
-	this.fixedElements = new $(containerSelector + " div.fixedElement");
-	this.packableElements = new $(containerSelector + " div.packableElement");
+	this.fixedElements = new js.JQuery(containerSelector + " div.fixedElement");
+	this.packableElements = new js.JQuery(containerSelector + " div.packableElement");
 	this.packables = new Array();
 	this.packableElements.each(function(index,value) {
 		_g.packables.push(new madebypi.util.rectanglepacking.Packable(index,value));
 	});
 	this.fixedPositions = [];
-	this.fixedElements.each(function(index,element) {
-		_g.fixedPositions[index] = madebypi.util.rectanglepacking.Packer.getDomElementBounds(element);
+	this.fixedElements.each(function(index1,element) {
+		_g.fixedPositions[index1] = madebypi.util.rectanglepacking.Packer.getDomElementBounds(element);
 	});
 	this.packableElements.css("display","block").css("background-color","#aaa");
 	this.prepare();
 	this.fixedElements.css("display","block").css("background-color","#666");
-	if(this.packables.length > 0) this.packItem(0); else haxe.Log.trace("Nothing to pack...?",{ fileName : "Packer.hx", lineNumber : 122, className : "madebypi.util.rectanglepacking.Packer", methodName : "new", customParams : ["warn"]});
+	if(this.packables.length > 0) this.packItem(0); else console.log("Nothing to pack...?");
 };
-madebypi.util.rectanglepacking.Packer.__name__ = true;
+madebypi.util.rectanglepacking.Packer.create = function(containerSelector,xCellSize,yCellSize,padX,padY) {
+	if(padY == null) padY = 8;
+	if(padX == null) padX = 8;
+	if(yCellSize == null) yCellSize = 8;
+	if(xCellSize == null) xCellSize = 8;
+	return new madebypi.util.rectanglepacking.Packer(containerSelector,xCellSize,yCellSize,padX,padY);
+};
 madebypi.util.rectanglepacking.Packer.getDomElementBounds = function(dom) {
-	var element = new $(dom);
-	var top = Std.parseFloat(element.css("top"));
-	var left = Std.parseFloat(element.css("left"));
+	var s = dom.style;
+	var width = Std.parseInt(HxOverrides.substr(s.width,0,s.width.length - 2));
+	var height = Std.parseInt(HxOverrides.substr(s.height,0,s.height.length - 2));
+	if(width == null) width = dom.clientWidth;
+	if(height == null) height = dom.clientHeight;
+	var top = Std.parseInt(s.top);
+	var left = Std.parseInt(s.left);
 	if(Math.isNaN(top)) top = 0;
 	if(Math.isNaN(left)) left = 0;
-	return new madebypi.util.rectanglepacking.geom.Rectangle(left,top,element.width(),element.height());
-}
+	return new madebypi.util.rectanglepacking.geom.Rectangle(left,top,width,height);
+};
 madebypi.util.rectanglepacking.Packer.prototype = {
-	sortPackableItemsByArea: function() {
-		var areas = [];
-		var sizeIndex = [];
-		var n = this.packables.length;
-		var _g = 0;
-		while(_g < n) {
-			var i = _g++;
-			areas.push({ index : i, area : this.packables[i].rect.get_area()});
+	prepare: function() {
+		var masterFixedNode = new js.JQuery("div#fixed-master.fixedElement");
+		var targetRect;
+		if(masterFixedNode.length == 0) {
+			console.log("#fixed-master not found in .fixedElement items. Using the container instead...");
+			targetRect = this.outerBounds.clone();
+		} else {
+			targetRect = madebypi.util.rectanglepacking.Packer.getDomElementBounds(masterFixedNode[0]);
+			masterFixedNode.css("display","block").css("background-color","#666");
 		}
-		areas.sort(function(a,b) {
-			if(a.area > b.area) return -1;
-			if(a.area < b.area) return 1;
-			return 0;
-		});
-		this.areaSortedIndices = [];
-		var _g = 0;
-		while(_g < n) {
-			var i = _g++;
-			this.areaSortedIndices[i] = areas[i].index;
+		this.sortPackableItemsByArea();
+		this.targetPoint = new madebypi.util.rectanglepacking.geom.Point(targetRect.x + Math.round(targetRect.width / 2),targetRect.y + Math.round(targetRect.height / 2));
+	}
+	,packItem: function(index) {
+		var _g = this;
+		var r = null;
+		var start = new Date().getTime();
+		var sortedIndex = this.areaSortedIndices[index];
+		var item = this.packables[sortedIndex];
+		if(!item.packed && !item.unpackable) {
+			r = this.findSpace(this.targetPoint,item.rect.clone());
+			if(r == null) {
+				console.log("Out of space! Can't place item " + item.index + " " + new js.JQuery(item.element).html());
+				item.unpackable = true;
+				new js.JQuery(item.element).remove();
+			} else {
+				console.log("Placing item " + item.index + " at " + r.toString());
+				item.packed = true;
+				this.fixedPositions.push(r);
+				item.jElement.css({ left : r.x}).css({ top : r.y}).css("display","block").removeClass("packableElement").addClass("packedElement");
+			}
 		}
+		var delta = new Date().getTime() - start;
+		console.log("Took " + delta + " ms to pack rect");
+		index++;
+		if(index == this.packables.length) {
+			this.packComplete();
+			return;
+		} else if(delta > 40) haxe.Timer.delay(function() {
+			_g.packItem(index);
+		},40); else this.packItem(index);
+	}
+	,packComplete: function() {
+		console.log("Packing complete");
+		var c = 0;
+		var _g1 = 0;
+		var _g = this.packables.length;
+		while(_g1 < _g) {
+			var i = _g1++;
+			if(this.packables[i].packed) c++;
+		}
+		console.log("Packed " + c + " of a possible " + this.packables.length + " rectangles");
 	}
 	,findSpace: function(target,rect) {
 		rect.inflate(this.padX,this.padY);
@@ -363,170 +286,117 @@ madebypi.util.rectanglepacking.Packer.prototype = {
 			}
 		}
 		if(!spaceFound) {
-			haxe.Log.trace("I'm sorry, I can't place that Dave.",{ fileName : "Packer.hx", lineNumber : 289, className : "madebypi.util.rectanglepacking.Packer", methodName : "findSpace"});
+			console.log("I'm sorry, I can't place that Dave.");
 			return null;
 		}
 		nearest.inflate(-this.padX,-this.padY);
 		return nearest;
 	}
-	,packComplete: function() {
-		haxe.Log.trace("Packing completed!",{ fileName : "Packer.hx", lineNumber : 212, className : "madebypi.util.rectanglepacking.Packer", methodName : "packComplete", customParams : ["info"]});
-		var c = 0;
-		var _g1 = 0, _g = this.packables.length;
+	,sortPackableItemsByArea: function() {
+		var areas = [];
+		var _g1 = 0;
+		var _g = this.packables.length;
 		while(_g1 < _g) {
 			var i = _g1++;
-			if(this.packables[i].packed) c++;
+			areas.push({ index : i, area : this.packables[i].rect.get_area()});
 		}
-		haxe.Log.trace("Packed " + c + " of a possible " + this.packables.length + " rectangles",{ fileName : "Packer.hx", lineNumber : 216, className : "madebypi.util.rectanglepacking.Packer", methodName : "packComplete", customParams : ["info"]});
-	}
-	,packItem: function(index) {
-		var _g = this;
-		var r = null;
-		var start = new Date().getTime();
-		var sortedIndex = this.areaSortedIndices[index];
-		var item = this.packables[sortedIndex];
-		if(!item.packed && !item.unpackable) {
-			r = this.findSpace(this.targetPoint,item.rect.clone());
-			if(r == null) {
-				haxe.Log.trace("Out of space! Can't place item " + item.index + " " + new $(item.element).html(),{ fileName : "Packer.hx", lineNumber : 172, className : "madebypi.util.rectanglepacking.Packer", methodName : "packItem", customParams : ["info"]});
-				item.unpackable = true;
-				new $(item.element).remove();
-			} else {
-				haxe.Log.trace("Placing item " + item.index + " at " + r.toString(),{ fileName : "Packer.hx", lineNumber : 178, className : "madebypi.util.rectanglepacking.Packer", methodName : "packItem"});
-				item.packed = true;
-				this.fixedPositions.push(r);
-				new $(item.element).css("left",r.x).css("top",r.y).css("display","block").removeClass("packableElement").addClass("packedElement");
-			}
+		areas.sort(function(a,b) {
+			if(a.area > b.area) return -1;
+			if(a.area < b.area) return 1;
+			return 0;
+		});
+		this.areaSortedIndices = [];
+		var _g11 = 0;
+		var _g2 = this.packables.length;
+		while(_g11 < _g2) {
+			var i1 = _g11++;
+			this.areaSortedIndices[i1] = areas[i1].index;
 		}
-		var delta = new Date().getTime() - start;
-		haxe.Log.trace("Took " + delta + "ms to pack rect",{ fileName : "Packer.hx", lineNumber : 193, className : "madebypi.util.rectanglepacking.Packer", methodName : "packItem"});
-		index++;
-		if(index == this.packables.length) {
-			this.packComplete();
-			return;
-		} else if(delta > madebypi.util.rectanglepacking.Packer.MAX_PACK_TIME) haxe.Timer.delay(function() {
-			_g.packItem(index);
-		},madebypi.util.rectanglepacking.Packer.MAX_PACK_TIME); else this.packItem(index);
 	}
-	,prepare: function() {
-		var masterFixedNode = new $("div#fixed-master.fixedElement");
-		var targetRect;
-		if(masterFixedNode.length == 0) {
-			haxe.Log.trace("#fixed-master not found in .fixedElement items. Using the container instead...",{ fileName : "Packer.hx", lineNumber : 137, className : "madebypi.util.rectanglepacking.Packer", methodName : "prepare", customParams : ["info"]});
-			targetRect = this.outerBounds.clone();
-		} else {
-			targetRect = madebypi.util.rectanglepacking.Packer.getDomElementBounds(masterFixedNode[0]);
-			masterFixedNode.css("display","block").css("background-color","#666");
-		}
-		this.sortPackableItemsByArea();
-		this.targetPoint = new madebypi.util.rectanglepacking.geom.Point(targetRect.x + targetRect.width / 2,targetRect.y + targetRect.height / 2);
-	}
-	,__class__: madebypi.util.rectanglepacking.Packer
-}
+};
 madebypi.util.rectanglepacking.Packable = function(index,element) {
+	element.id = "packable_" + index;
+	this.jElement = new js.JQuery(element);
 	this.unpackable = false;
 	this.packed = false;
 	this.element = element;
 	this.index = index;
 	this.rect = madebypi.util.rectanglepacking.Packer.getDomElementBounds(element);
-	new $(element).attr("id","packable_" + index);
 };
-madebypi.util.rectanglepacking.Packable.__name__ = true;
-madebypi.util.rectanglepacking.Packable.prototype = {
-	__class__: madebypi.util.rectanglepacking.Packable
-}
-madebypi.util.rectanglepacking.geom = {}
+madebypi.util.rectanglepacking.geom = {};
 madebypi.util.rectanglepacking.geom.Point = function(pX,pY) {
-	this.x = pX == null?0.0:pX;
-	this.y = pY == null?0.0:pY;
+	if(pX == null) this.x = 0; else this.x = pX;
+	if(pY == null) this.y = 0; else this.y = pY;
 };
-madebypi.util.rectanglepacking.geom.Point.__name__ = true;
 madebypi.util.rectanglepacking.geom.Point.prototype = {
 	clone: function() {
 		return new madebypi.util.rectanglepacking.geom.Point(this.x,this.y);
 	}
-	,__class__: madebypi.util.rectanglepacking.geom.Point
-}
+};
 madebypi.util.rectanglepacking.geom.Rectangle = function(x,y,width,height) {
-	if(height == null) height = 0.0;
-	if(width == null) width = 0.0;
-	if(y == null) y = 0.0;
-	if(x == null) x = 0.0;
+	if(height == null) height = 0;
+	if(width == null) width = 0;
+	if(y == null) y = 0;
+	if(x == null) x = 0;
 	this.x = x;
 	this.y = y;
 	this.width = width;
 	this.height = height;
 };
-madebypi.util.rectanglepacking.geom.Rectangle.__name__ = true;
 madebypi.util.rectanglepacking.geom.Rectangle.intersects = function(rectA,rectB) {
-	return (rectA.get_right() > rectB.get_right()?rectB.get_right():rectA.get_right()) <= (rectA.x < rectB.x?rectB.x:rectA.x)?false:(rectA.get_bottom() > rectB.get_bottom()?rectB.get_bottom():rectA.get_bottom()) > (rectA.y < rectB.y?rectB.y:rectA.y);
-}
+	if((rectA.get_right() > rectB.get_right()?rectB.get_right():rectA.get_right()) <= (rectA.x < rectB.x?rectB.x:rectA.x)) return false; else return (rectA.get_bottom() > rectB.get_bottom()?rectB.get_bottom():rectA.get_bottom()) > (rectA.y < rectB.y?rectB.y:rectA.y);
+};
 madebypi.util.rectanglepacking.geom.Rectangle.prototype = {
-	inflate: function(dx,dy) {
-		this.x -= dx;
-		this.width += dx * 2;
-		this.y -= dy;
-		this.height += dy * 2;
-	}
-	,clone: function() {
-		return new madebypi.util.rectanglepacking.geom.Rectangle(this.x,this.y,this.width,this.height);
-	}
-	,get_bottomRight: function() {
-		return new madebypi.util.rectanglepacking.geom.Point(this.x + this.width,this.y + this.height);
-	}
-	,get_size: function() {
-		return new madebypi.util.rectanglepacking.geom.Point(this.width,this.height);
-	}
-	,get_topLeft: function() {
-		return new madebypi.util.rectanglepacking.geom.Point(this.x,this.y);
-	}
-	,get_bottom: function() {
-		return this.y + this.height;
-	}
-	,get_top: function() {
-		return this.y;
-	}
-	,get_right: function() {
-		return this.x + this.width;
-	}
-	,get_left: function() {
-		return this.x;
+	toString: function() {
+		return "[Rectangle x:" + this.x + ", y:" + this.y + ", w:" + this.width + ", h:" + this.height + "]";
 	}
 	,get_area: function() {
 		return this.width * this.height;
 	}
-	,toString: function() {
-		return "[Rectangle x:" + this.x + ", y:" + this.y + ", w:" + this.width + ", h:" + this.height + "]";
+	,get_left: function() {
+		return this.x;
 	}
-	,__class__: madebypi.util.rectanglepacking.geom.Rectangle
-}
-Math.__name__ = ["Math"];
+	,get_right: function() {
+		return this.x + this.width;
+	}
+	,get_top: function() {
+		return this.y;
+	}
+	,get_bottom: function() {
+		return this.y + this.height;
+	}
+	,get_topLeft: function() {
+		return new madebypi.util.rectanglepacking.geom.Point(this.x,this.y);
+	}
+	,get_size: function() {
+		return new madebypi.util.rectanglepacking.geom.Point(this.width,this.height);
+	}
+	,get_bottomRight: function() {
+		return new madebypi.util.rectanglepacking.geom.Point(this.x + this.width,this.y + this.height);
+	}
+	,clone: function() {
+		return new madebypi.util.rectanglepacking.geom.Rectangle(this.x,this.y,this.width,this.height);
+	}
+	,inflate: function(dx,dy) {
+		this.x -= dx;
+		this.width += dx << 1;
+		this.y -= dy;
+		this.height += dy << 1;
+	}
+};
 Math.NaN = Number.NaN;
 Math.NEGATIVE_INFINITY = Number.NEGATIVE_INFINITY;
 Math.POSITIVE_INFINITY = Number.POSITIVE_INFINITY;
 Math.isFinite = function(i) {
 	return isFinite(i);
 };
-Math.isNaN = function(i) {
-	return isNaN(i);
+Math.isNaN = function(i1) {
+	return isNaN(i1);
 };
-String.prototype.__class__ = String;
-String.__name__ = true;
-Array.prototype.__class__ = Array;
-Array.__name__ = true;
-Date.prototype.__class__ = Date;
-Date.__name__ = ["Date"];
-var Int = { __name__ : ["Int"]};
-var Dynamic = { __name__ : ["Dynamic"]};
-var Float = Number;
-Float.__name__ = ["Float"];
-var Bool = Boolean;
-Bool.__ename__ = ["Bool"];
-var Class = { __name__ : ["Class"]};
-var Enum = { };
+var jq;
+if(typeof define === 'function' && define.amd) jq = require("jquery"); else jq = window.jQuery;
+js.JQuery = jq;
 Main.isDebug = true;
 madebypi.util.rectanglepacking.Packer.MAX_PACK_TIME = 40;
 Main.main();
-})();
-
-//@ sourceMappingURL=rectanglepacking-debug.js.map
+}));

@@ -23,6 +23,8 @@ package madebypi.util.rectanglepacking.geom;
 /**
  * Bare minimum Rectangle functionality required for the rectangle packer.
  * Based on jeash/flash geom.Rectangle
+ * 
+ * IntRectangle
  *
  * @author Mike Almond -
  * https://github.com/MadeByPi
@@ -32,13 +34,12 @@ package madebypi.util.rectanglepacking.geom;
 
 @:final class Rectangle {
 
+	public var x		:Int;
+	public var y 		:Int;
+	public var width	:Int;
+	public var height	:Int;
 
-	public var x		:Float;
-	public var y 		:Float;
-	public var width	:Float;
-	public var height	:Float;
-
-   public function new(x : Float = 0.0, y : Float = 0.0, width : Float = 0.0, height : Float = 0.0) : Void {
+   public function new(x : Int = 0, y : Int = 0, width : Int = 0, height : Int = 0) : Void {
 		this.x 		= x;
 		this.y 		= y;
 		this.width 	= width;
@@ -49,39 +50,37 @@ package madebypi.util.rectanglepacking.geom;
 		return "[Rectangle x:" + x + ", y:" + y + ", w:" + width + ", h:" + height + "]";
 	}
 
-	public var area(get_area, null):Float;
-	private function get_area() { return width * height; }
+	public var area(get, null):Int;
+	function get_area() return width * height;
 	
-	public var left(get_left,null) : Float;
-	function get_left() { return x; }
+	public var left(get,null) : Int;
+	function get_left() return x;
 
-	public var right(get_right,null) : Float;
-	function get_right() { return x + width; }
+	public var right(get,null) : Int;
+	function get_right() return x + width;
 
-	public var top(get_top,null) : Float;
-	function get_top() { return y; }
+	public var top(get,null) : Int;
+	function get_top() return y;
 
-	public var bottom(get_bottom,null) : Float;
-	function get_bottom() { return y + height; }
+	public var bottom(get,null) : Int;
+	function get_bottom() return y + height;
 	
-	public var topLeft(get_topLeft,null) : Point;
-	function get_topLeft() { return new Point(x,y); }
+	public var topLeft(get,null) : Point;
+	function get_topLeft() return new Point(x,y);
 	
-	public var size(get_size,null) : Point;
-	function get_size() { return new Point(width, height); }
+	public var size(get,null) : Point;
+	function get_size() return new Point(width, height);
 
-	public var bottomRight(get_bottomRight,null) : Point;
-	function get_bottomRight() { return new Point(x + width, y + height); }
+	public var bottomRight(get, null) : Point;
+	function get_bottomRight() return new Point(x + width, y + height);
 	
-	public function clone() : Rectangle {
-		return new Rectangle(x, y, width, height);
-	}
+	inline public function clone():Rectangle return new Rectangle(x, y, width, height);
 	
-	public function inflate(dx : Float, dy : Float) : Void  {
+	public function inflate(dx : Int, dy : Int) : Void  {
 		x 		-= dx;
-		width  	+= dx * 2;
+		width  	+= (dx << 1);
 		y 		-= dy;
-		height 	+= dy * 2;
+		height 	+= (dy << 1);
 	}
 	
 	

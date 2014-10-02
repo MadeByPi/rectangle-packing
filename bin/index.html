@@ -4,8 +4,8 @@
 	<meta charset="utf-8"/>
 	<title>rectangle-packing</title>
 	<meta name="description" content="" />
-	<!--script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script-->
-	<script type="text/javascript" src="./jquery.min.js"></script>
+	<!--script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script-->
+	<script type="text/javascript" src="./jquery.js"></script>
 	<style>
 		html, body{
 			margin:0;
@@ -13,8 +13,9 @@
 	
 		div#rectContainer {
 			position:relative;
-			width:330px;
-			height:830px;
+			width:1280px;
+			height:640px;
+			background-color:#fafafa;
 		}
 		
 		.fixedElement {
@@ -41,38 +42,42 @@
 		The code will try to pack elements as close as possible to the #fixed-master element (trying to get to the middle of the rect)
 		
 		If a fixed-master not specified, the packable elements will arrange around the centre of the main div#rectContainer bounds.
-		The Fixed elements all need absolute positioning (top and left) and a fixed width/height
+		The Fixed elements (as many as you want) all need absolute positioning (top and left) and a fixed width/height
 		-->
-		<div id="fixed-master"	class="fixedElement" style="width:196px;height:230px;top:150px;left:200px;"></div>
-		<!--div 					class="fixedElement" style="width:50px;height:100px;top:0px;left:0px;"></div>
+		<div id="fixed-master"	class="fixedElement" style="width:196px;height:230px;top:195px;left:525px;"></div>
+		<!--div 				class="fixedElement" style="width:50px;height:100px;top:0px;left:0px;"></div>
 		<div 					class="fixedElement" style="width:64px;height:37px;top:0px;left:50px;"></div>
 		<div 					class="fixedElement" style="width:31px;height:154px;top:0px;left:498px;"></div>
 		<div 					class="fixedElement" style="width:31px;height:140px;top:390px;left:498px;"></div>
 		<div 					class="fixedElement" style="width:50px;height:45px;top:486px;left:0px;"></div-->
 		
 		<!-- packables - a fixed width/height must be defined on each item with the packableElement class -->
-		<!-- if a packableElement can't be placed it will be removed from the dom. -->
+		<!-- if a packableElement can't be placed it will be removed from the dom. 
+		<div class="packableElement" style="width:180px;height:211px;"></div>
 		<div class="packableElement" style="width:180px;height:211px;"></div>
 		<div class="packableElement" style="width:60px;height:95px;"></div>
+		<div class="packableElement" style="width:60px;height:95px;"></div>
+		<div class="packableElement" style="width:125px;height:190px;"></div>
 		<div class="packableElement" style="width:125px;height:190px;"></div>
 		<div class="packableElement" style="width:101px;height:154px;"></div>
 		<div class="packableElement" style="width:90px;height:140px;"></div>
+		<div class="packableElement" style="width:90px;height:140px;"></div>
+		<div class="packableElement" style="width:90px;height:140px;"></div>
 		<div class="packableElement" style="width:116px;height:163px;"></div>
+		<div class="packableElement" style="width:100px;height:155px;"></div>
+		<div class="packableElement" style="width:100px;height:155px;"></div>
 		<div class="packableElement" style="width:100px;height:155px;"></div>
 		<div class="packableElement" style="width:62px;height:90px;"></div>
 		<div class="packableElement" style="width:60px;height:84px;"></div>
 		<div class="packableElement" style="width:51px;height:76px;"></div>
 		<div class="packableElement" style="width:48px;height:58px;"></div>
 		<div class="packableElement" style="width:96px;height:72px;"></div>
-		<div class="packableElement" style="width:48px;height:48px;"></div>
-		<div class="packableElement" style="width:32px;height:48px;"></div>
-		<div class="packableElement" style="width:32px;height:48px;"></div>
-		<div class="packableElement" style="width:42px;height:48px;"></div>
-		<div class="packableElement" style="width:32px;height:32px;"></div>
+		<div class="packableElement" style="width:96px;height:72px;"></div>-->
 	</div>
 	
 	<!-- debug: the un-minified debug build. Use this to be able to get more logging and see the fixed (negative) areas and the packable-elements as they are packed...-->
-	<script data="mbp_rectanglePacker" src="rectanglepacking-debug.js?container=div#rectContainer&xCellSize=4&yCellSize=4&padX=8&padY=8"></script>
+	<script data="mbp_rectanglePacker" src="rectanglepacking-debug.js?container=#rectContainer&xCellSize=4&yCellSize=4&padX=8&padY=8"></script>
+	<!--script data="mbp_rectanglePacker" src="rectanglepacking-debug.js"></script-->
 	
 	<!-- release: the minified release build.
 	The data attribute with a value of "mbp_rectanglePacker" is required
